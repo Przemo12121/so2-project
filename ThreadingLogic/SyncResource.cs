@@ -1,4 +1,6 @@
-﻿namespace ThreadingLogic;
+﻿using System;
+
+namespace ThreadingLogic;
 
 public class SyncResource
 {

@@ -1,4 +1,7 @@
-﻿namespace ThreadingLogic;
+﻿using System;
+using System.Threading;
+
+namespace ThreadingLogic;
 
 public class Client
 {
