@@ -5,19 +5,22 @@ namespace ThreadingLogic.Map;
 
 public class Route
 {
-    private IReadOnlyList<Section> _map;
+    public IReadOnlyList<Section> Map { get; private init; }
     
     public Route(int length)
     {
-        _map = new List<Section>(
+        Map = new List<Section>(
             Enumerable.Range(0, length)
                 .Select(index => new Section(index))
         );
     }
 
     public Section Next(Section section)
-        => _map[(section.Index +1) % _map.Count];
+        => Map[(section.Index +1) % Map.Count];
 
     public Section Enter()
-        => _map[0];
+        => Map[0];
+
+    public bool IsFinished(Section position)
+        => position.Index.Equals(Map.Count - 1);
 };

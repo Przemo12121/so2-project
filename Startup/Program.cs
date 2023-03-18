@@ -1,39 +1,39 @@
-﻿using ThreadingLogic;
+﻿using ThreadingLogic.Map;
 
-Console.WriteLine("Hello, World!");
+var map = new Route(10);
 
-CancellationTokenSource source1 = new();
-CancellationTokenSource source2 = new();
+CancellationTokenSource tokenSource = new();
+Console.CursorVisible = false;
+var mapPrint = new Thread(() =>
+{
+    while (!tokenSource.Token.IsCancellationRequested)
+    {
+        Thread.Sleep(100);
+        Console.Clear();
+        Console.Write("> ");
+        Console.Write(
+            map.Map
+                .Select(section => String.IsNullOrEmpty(section.Occupant) ? "_" : section.Occupant)
+                .Aggregate((a, b) => $"{a}{b}")
+        );
+        Console.Write(" <");
+    }
+});
+mapPrint.Start();
 
-Client c1 = new (1, 1000, source1);
-Client c2 = new (2, 3000, source2);
+var cart1 = new GoCart(map, "1");
+cart1.Delay = 500;
+var cart2 = new GoCart(map, "2");
+cart2.Delay = 2000;
+var cart3 = new GoCart(map, "3");
+cart3.Delay = 1000;
 
-source1.CancelAfter(5000);
-source2.CancelAfter(5000);
+var t1 = new Thread(() => cart1.DoRounds(10));
+var t2 = new Thread(() => cart2.DoRounds(1));
+var t3 = new Thread(() => cart3.DoRounds(3));
 
-Thread.Sleep(7000);
-Console.WriteLine("\nPart2\n");
-
-SyncResource resource = new();
-CancellationTokenSource source3 = new();
-CancellationTokenSource source4 = new();
-
-var sc1 = new SyncingClient(3, 3500, resource, source3);
-var sc2 = new SyncingClient(4, 1500, resource, source4);
-
-source3.CancelAfter(7000);
-source4.CancelAfter(10000);
-Thread.Sleep(11000);
-
-Console.WriteLine("\nPart3\n");
-
-SyncResource resource2 = new();
-SyncResource resource3 = new();
-CancellationTokenSource source5 = new();
-CancellationTokenSource source6 = new();
-
-var sc3 = new SyncingClient(3, 3500, resource2, source5);
-var sc4 = new SyncingClient(4, 1500, resource3, source6);
-
-source5.CancelAfter(7000);
-source6.CancelAfter(10000);
+t1.Start();
+Thread.Sleep(10);
+t2.Start();
+Thread.Sleep(6000);
+t3.Start();
