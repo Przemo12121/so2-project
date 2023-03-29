@@ -1,8 +1,16 @@
 ﻿using ThreadingLogic.Map;
+using ThreadingLogic.Buffers;
+using ThreadingLogic.Clients;
 
 var map = new Route(10);
-
+GoCart[] goCarts = Enumerable
+    .Range(0, 3)
+    .Select(_ => new GoCart(map))
+    .ToArray();
+RouteAccessorsBuffer<IRouteAccessor> goCartsBuffer = new(goCarts);
 CancellationTokenSource tokenSource = new();
+ClientsManager manager = new(1000, goCartsBuffer, tokenSource.Token);
+
 Console.CursorVisible = false;
 var mapPrint = new Thread(() =>
 {
@@ -10,6 +18,10 @@ var mapPrint = new Thread(() =>
     {
         Thread.Sleep(100);
         Console.Clear();
+        
+        Console.WriteLine($"Free GoCarts: {goCartsBuffer.Count()}");
+        Console.WriteLine($"Waiting clients: {manager.WaitingClientsCount()}\n");
+        
         Console.Write("> ");
         Console.Write(
             map.Map
@@ -20,20 +32,3 @@ var mapPrint = new Thread(() =>
     }
 });
 mapPrint.Start();
-
-var cart1 = new GoCart(map, "1");
-cart1.Delay = 500;
-var cart2 = new GoCart(map, "2");
-cart2.Delay = 2000;
-var cart3 = new GoCart(map, "3");
-cart3.Delay = 1000;
-
-var t1 = new Thread(() => cart1.DoRounds(10));
-var t2 = new Thread(() => cart2.DoRounds(1));
-var t3 = new Thread(() => cart3.DoRounds(3));
-
-t1.Start();
-Thread.Sleep(10);
-t2.Start();
-Thread.Sleep(6000);
-t3.Start();

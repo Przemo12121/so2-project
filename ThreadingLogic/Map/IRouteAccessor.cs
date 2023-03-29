@@ -2,5 +2,7 @@
 
 public interface IRouteAccessor
 {
-    void DoRounds(int rounds);
+    void DoRounds(int rounds, CancellationToken token);
+    string Marker { get; set; }
+    int Delay { get; set; }
 }

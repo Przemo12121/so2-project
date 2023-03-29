@@ -3,18 +3,17 @@
 public class GoCart : IRouteAccessor
 {
     private readonly Route _route;
-    private readonly string _id;
-    private Section? Position { get; set; }
+    public string Marker { get; set; } = String.Empty;
+    private Section? Position { get; set; } = default;
     
     public int Delay { get; set; }
     
-    public GoCart(Route route, string id)
+    public GoCart(Route route)
     {
         _route = route;
-        _id = id;
     }
     
-    public void DoRounds(int rounds)
+    public void DoRounds(int rounds, CancellationToken token)
     {
         if (rounds < 1)
         {
@@ -22,7 +21,7 @@ public class GoCart : IRouteAccessor
         }
         Section nextPosition;
 
-        for (int lap = 0; lap < rounds; lap++)
+        for (int lap = 0; lap < rounds && !token.IsCancellationRequested; lap++)
         {
             Position = _route.Enter();
             
@@ -30,13 +29,13 @@ public class GoCart : IRouteAccessor
             {
                 lock (Position)
                 {
-                    Position.Occupant = _id;
+                    Position.Occupant = Marker;
                     Thread.Sleep(Delay);
                     nextPosition = _route.Next(Position);
 
                     lock (nextPosition)
                     {
-                        nextPosition.Occupant = _id;
+                        nextPosition.Occupant = Marker;
                         Position!.Occupant = String.Empty;
                         Position = nextPosition;
                     }
@@ -45,7 +44,7 @@ public class GoCart : IRouteAccessor
 
             lock (Position)
             {
-                Position.Occupant = _id;
+                Position.Occupant = Marker;
                 Thread.Sleep(Delay);
                 Position.Occupant = String.Empty;
             }
