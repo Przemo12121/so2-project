@@ -1,0 +1,85 @@
+﻿@page "/"
+@using ThreadingLogic.Map
+@using BlazorApp.Hubs
+@using Microsoft.AspNetCore.SignalR.Client
+@inject IRoute Route
+@inject MapSyncingHub Hub
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+
+<div style="width: 100%; height: 100%; background-color: beige; display: flex; align-items: center; flex-direction: column">
+    <h1>Multithread project by Przemysław Małecki</h1>
+    
+    <div style="width: 100%; height: 100%; background-color: beige; display: flex; align-items: center; flex-direction: column">
+        <!-- upper line -->
+        <div style="width: 300px; height: 30px; display: flex; flex-direction: row; background-color: azure">
+            @for (int index = 0; index < 10; index++)
+            {
+                <div style="font-size:30px; height: 30px; width: 30px; background-color: @Route.Map[index].Occupant?.HexColor; text-align: center;  display: flex; justify-content: center">
+                    @Route.Map[index].Occupant?.Marker 
+                </div>
+            }
+        </div>
+        
+        <!-- vertical lines -->
+        <div style="width: 300px; height: 120px; display: flex; flex-direction: row-reverse; justify-content: space-between">
+            <!-- right line -->
+            <div style="width: 30px; height: 120px; display: flex; flex-direction: column; background-color: azure">
+                @for (int index = 10; index < 14; index++)
+                {
+                    <div style="font-size:30px; height: 30px; width: 30px; background-color: @Route.Map[index].Occupant?.HexColor; text-align: center; display: flex; justify-content: center">
+                        @Route.Map[index].Occupant?.Marker
+                    </div>
+                }
+            </div>
+            
+            <!-- left line -->
+            <div style="width: 30px; height: 120px; display: flex; flex-direction: column-reverse; background-color: azure">
+            @for (int index = 24; index < 28; index++)
+            {
+                <div style="font-size:30px; height: 30px; width: 30px; background-color: @Route.Map[index].Occupant?.HexColor; text-align: center; display: flex; justify-content: center">
+                    @Route.Map[index].Occupant?.Marker
+                </div>
+            }
+            </div>
+        </div>
+        <!-- lower line -->
+        <div style="width: 300px; height: 30px; display: flex; flex-direction: row-reverse; background-color: azure">
+            @for (int index = 14; index < 24; index++)
+            {
+                <div style="font-size:30px; height: 30px; width: 30px; background-color: @Route.Map[index].Occupant?.HexColor; text-align: center; display: flex; justify-content: center">
+                    @Route.Map[index].Occupant?.Marker
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code
+{
+    private HubConnection? _hubConnection;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        string baseUrl = NavigationManager.BaseUri;
+        
+        var hubUrl = baseUrl.TrimEnd('/') + MapSyncingHub.HubUrl;
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(hubUrl)
+            .Build();
+
+        _hubConnection.On("MapChanged", UpdateMap);
+        
+        await _hubConnection.StartAsync();
+    }
+
+    private void UpdateMap() => StateHasChanged();
+    
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
+    }
+}

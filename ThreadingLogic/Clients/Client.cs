@@ -25,7 +25,7 @@ public class Client
     {
         var goCart = GetGoCart(token);
         _onEnter?.Invoke();
-        goCart.DoRounds(new Random().Next() % 10, token);
+        goCart.DoRounds(new Random().Next() % 9 + 1, token);
         LeaveGoCart(goCart);
     }
 

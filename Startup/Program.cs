@@ -5,7 +5,7 @@ using ThreadingLogic.Clients;
 var map = new Route(10);
 GoCart[] goCarts = Enumerable
     .Range(0, 3)
-    .Select(_ => new GoCart(map))
+    .Select(_ => new GoCart(map, ""))
     .ToArray();
 RouteAccessorsBuffer<IRouteAccessor> goCartsBuffer = new(goCarts);
 CancellationTokenSource tokenSource = new();
@@ -25,7 +25,7 @@ var mapPrint = new Thread(() =>
         Console.Write("> ");
         Console.Write(
             map.Map
-                .Select(section => String.IsNullOrEmpty(section.Occupant) ? "_" : section.Occupant)
+                .Select(section => section.Occupant?.Marker ?? "_")
                 .Aggregate((a, b) => $"{a}{b}")
         );
         Console.Write(" <");

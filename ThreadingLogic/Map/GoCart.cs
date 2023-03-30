@@ -1,16 +1,18 @@
 ﻿namespace ThreadingLogic.Map;
 
-public class GoCart : IRouteAccessor
+public class GoCart : IGoCart
 {
     private readonly Route _route;
     public string Marker { get; set; } = String.Empty;
+    public string HexColor { get; init; }
     private Section? Position { get; set; } = default;
     
     public int Delay { get; set; }
     
-    public GoCart(Route route)
+    public GoCart(Route route, string hexColor)
     {
         _route = route;
+        HexColor = hexColor;
     }
     
     public void DoRounds(int rounds, CancellationToken cancellationToken)
@@ -29,14 +31,14 @@ public class GoCart : IRouteAccessor
             {
                 lock (Position)
                 {
-                    Position.Occupant = Marker;
+                    Position.Occupant = this;
                     Thread.Sleep(Delay);
                     nextPosition = _route.Next(Position);
 
                     lock (nextPosition)
                     {
-                        nextPosition.Occupant = Marker;
-                        Position!.Occupant = String.Empty;
+                        nextPosition.Occupant = this;
+                        Position!.Occupant = default;
                         Position = nextPosition;
                     }
                 }
@@ -44,9 +46,9 @@ public class GoCart : IRouteAccessor
 
             lock (Position)
             {
-                Position.Occupant = Marker;
+                Position.Occupant = this;
                 Thread.Sleep(Delay);
-                Position.Occupant = String.Empty;
+                Position.Occupant = default;
             }
         }
         

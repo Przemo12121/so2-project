@@ -29,7 +29,7 @@ public class ClientsManager
         while (!cancellationToken.IsCancellationRequested)
         {
             Thread.Sleep(_delay);
-            if (_waitingClientsCounter.Value >= 5)
+            if (_waitingClientsCounter.Value >= 15)
             {
                 continue;
             }
@@ -39,10 +39,10 @@ public class ClientsManager
                 _waitingClientsCounter.Increase();
             }
             
-            NextId = (NextId + 1) % 10;
+            NextId = (NextId + 1) % 99;
             new Client(
                 id: NextId.ToString(), 
-                delay: (_random.Next() % 5) * 500, 
+                delay: (_random.Next() % 10) * 100 + 100, 
                 goCartsBuffer: _goCartsBuffer, 
                 onEnter: OnClientEnter, 
                 cancellationToken: cancellationToken

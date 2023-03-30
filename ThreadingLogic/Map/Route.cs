@@ -1,6 +1,6 @@
 ﻿namespace ThreadingLogic.Map;
 
-public class Route
+public class Route : IRoute
 {
     public IReadOnlyList<Section> Map { get; private init; }
     
