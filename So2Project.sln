@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startup", "Startup\Startup.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreadingLogic", "ThreadingLogic\ThreadingLogic.csproj", "{99BDE272-FB58-493A-9BD9-AF606DA1ACCC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gui", "Gui\Gui.csproj", "{1AB346DA-3A49-45F2-83D9-AA77EC18776B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{99BDE272-FB58-493A-9BD9-AF606DA1ACCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99BDE272-FB58-493A-9BD9-AF606DA1ACCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99BDE272-FB58-493A-9BD9-AF606DA1ACCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AB346DA-3A49-45F2-83D9-AA77EC18776B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AB346DA-3A49-45F2-83D9-AA77EC18776B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AB346DA-3A49-45F2-83D9-AA77EC18776B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AB346DA-3A49-45F2-83D9-AA77EC18776B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
