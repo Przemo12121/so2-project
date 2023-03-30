@@ -32,7 +32,7 @@ public class Client
 
     private IRouteAccessor GetGoCart(CancellationToken token)
     {
-        IRouteAccessor? goCart = default;
+        IRouteAccessor? goCart;
         do
         {
             Thread.Sleep(_delay);
