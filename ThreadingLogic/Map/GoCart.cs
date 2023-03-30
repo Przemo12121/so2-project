@@ -13,7 +13,7 @@ public class GoCart : IRouteAccessor
         _route = route;
     }
     
-    public void DoRounds(int rounds, CancellationToken token)
+    public void DoRounds(int rounds, CancellationToken cancellationToken)
     {
         if (rounds < 1)
         {
@@ -21,7 +21,7 @@ public class GoCart : IRouteAccessor
         }
         Section nextPosition;
 
-        for (int lap = 0; lap < rounds && !token.IsCancellationRequested; lap++)
+        for (int lap = 0; lap < rounds && !cancellationToken.IsCancellationRequested; lap++)
         {
             Position = _route.Enter();
             

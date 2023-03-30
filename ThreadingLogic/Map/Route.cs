@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace ThreadingLogic.Map;
+﻿namespace ThreadingLogic.Map;
 
 public class Route
 {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ThreadingLogic.Map;
+﻿namespace ThreadingLogic.Map;
 
 public record Section(int Index)
 {

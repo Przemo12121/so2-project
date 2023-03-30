@@ -1,5 +1,6 @@
-﻿using ThreadingLogic.Buffers;
-using ThreadingLogic.Map;
+﻿using ThreadingLogic.Map;
+using ThreadingLogic.Utils;
+using ThreadingLogic.Buffers;
 
 namespace ThreadingLogic.Clients;
 
@@ -9,22 +10,23 @@ public class ClientsManager
     private readonly int _delay;
     private readonly Random _random;
     private readonly IBuffer<IRouteAccessor> _goCartsBuffer;
-    private readonly Counter _waitingClientsCounter;
+    private readonly ICounter _waitingClientsCounter;
     
-    public ClientsManager(int delay, IBuffer<IRouteAccessor> goCartsBuffer, CancellationToken token)
+    public ClientsManager(int delay, IBuffer<IRouteAccessor> goCartsBuffer, CancellationToken cancellationToken)
     {
         _delay = delay;
         _goCartsBuffer = goCartsBuffer;
-        _random = new Random();
+        
+        _random = new();
         _waitingClientsCounter = new Counter(0);
         
-        Thread thread = new Thread(() => DoWork(token));
+        Thread thread = new(() => DoWork(cancellationToken));
         thread.Start();
     }
 
-    private void DoWork(CancellationToken token)
+    private void DoWork(CancellationToken cancellationToken)
     {
-        while (!token.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             Thread.Sleep(_delay);
             if (_waitingClientsCounter.Value >= 5)
@@ -38,7 +40,13 @@ public class ClientsManager
             }
             
             NextId = (NextId + 1) % 10;
-            new Client(NextId.ToString(), (_random.Next() % 5) * 500, _goCartsBuffer, OnClientEnter, token);
+            new Client(
+                id: NextId.ToString(), 
+                delay: (_random.Next() % 5) * 500, 
+                goCartsBuffer: _goCartsBuffer, 
+                onEnter: OnClientEnter, 
+                cancellationToken: cancellationToken
+            );
         }
     }
 

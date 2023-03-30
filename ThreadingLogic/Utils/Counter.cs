@@ -1,6 +1,6 @@
-﻿namespace ThreadingLogic;
+﻿namespace ThreadingLogic.Utils;
 
-public class Counter
+public class Counter : ICounter
 {
     public int Value { get; private set; }
     

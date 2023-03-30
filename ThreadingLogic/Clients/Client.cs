@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading;
-using ThreadingLogic.Buffers;
+﻿using ThreadingLogic.Buffers;
 using ThreadingLogic.Map;
 
-namespace ThreadingLogic;
+namespace ThreadingLogic.Clients;
 
 public class Client
 {
@@ -12,14 +10,14 @@ public class Client
     private readonly IBuffer<IRouteAccessor> _goCartsBuffer;
     private readonly Action? _onEnter;
 
-    public Client(string id, int delay, IBuffer<IRouteAccessor> goCartsBuffer, Action? onEnter, CancellationToken token)
+    public Client(string id, int delay, IBuffer<IRouteAccessor> goCartsBuffer, Action? onEnter, CancellationToken cancellationToken)
     {
         _delay = delay;
         _id = id;
         _goCartsBuffer = goCartsBuffer;
         _onEnter = onEnter;
         
-        Thread thread = new(() => DoWork(token));
+        Thread thread = new(() => DoWork(cancellationToken));
         thread.Start();
     }
 
