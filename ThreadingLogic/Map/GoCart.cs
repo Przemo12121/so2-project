@@ -21,36 +21,32 @@ public class GoCart : IGoCart
         {
             return;
         }
-        Section nextPosition;
-
-        for (int lap = 0; lap < rounds && !cancellationToken.IsCancellationRequested; lap++)
+        
+        int lap = 0;
+        Section nextPosition = _route.Enter();
+        Position = _route.Enter();
+        
+        do
         {
-            Position = _route.Enter();
-            
-            while (_route.IsFinished(Position) is false)
-            {
-                lock (Position)
-                {
-                    Position.Occupant = this;
-                    Thread.Sleep(Delay);
-                    nextPosition = _route.Next(Position);
-
-                    lock (nextPosition)
-                    {
-                        nextPosition.Occupant = this;
-                        Position!.Occupant = default;
-                        Position = nextPosition;
-                    }
-                }
-            }
-
             lock (Position)
             {
                 Position.Occupant = this;
                 Thread.Sleep(Delay);
-                Position.Occupant = default;
+                nextPosition = _route.Next(Position);
+
+                lock (nextPosition)
+                {
+                    Position.Occupant = default;
+                    Position = nextPosition;
+                }
+
+                if (_route.IsFinished(Position))
+                {
+                    lap++;
+                }
             }
-        }
+        } while (lap < rounds && !cancellationToken.IsCancellationRequested);
         
+        Position.Occupant = this;
     }
 }

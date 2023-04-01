@@ -13,7 +13,7 @@ public class Route : IRoute
     }
 
     public Section Next(Section section)
-        => Map[(section.Index +1) % Map.Count];
+        => Map[(section.Index + 1) % Map.Count];
 
     public Section Enter()
         => Map[0];

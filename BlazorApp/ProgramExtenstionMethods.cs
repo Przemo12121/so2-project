@@ -17,30 +17,23 @@ public static class ProgramExtenstionMethods
             .Range(0, 10)
             .Select(i => new GoCart(map, colors[i]))
             .ToArray();
-        RouteAccessorsBuffer<IRouteAccessor> goCartsBuffer = new(goCarts);
-        
         
         builder.Services.AddSingleton<IRoute, ThreadingLogic.Map.Route>(service => map);
-        builder.Services.AddSingleton<RouteAccessorsBuffer<IRouteAccessor>>(service => goCartsBuffer);
-
+        builder.Services.AddSingleton<RouteAccessorsBuffer<IRouteAccessor>>(service => new (goCarts));
         builder.Services.AddSingleton<MapSyncingHub>();
     }
     
     public static void StartThreads(this WebApplication app)
     {
-        var hubUrl = "http://localhost:5224" + MapSyncingHub.HubUrl;
+        var hubUrl = app.Configuration["URLS"] + MapSyncingHub.HubUrl;
         var hubConnection = new HubConnectionBuilder()
             .WithUrl(hubUrl)
             .Build();
         
-        hubConnection.On("Abc", () => { });
-        
         var buffer = app.Services.GetService<RouteAccessorsBuffer<IRouteAccessor>>();
-        var map = app.Services.GetService<IRoute>();
-        
         
         CancellationTokenSource tokenSource = new();
-        ClientsManager manager = new(1000, buffer!, tokenSource.Token);
+        new ClientsManager(1000, buffer!, tokenSource.Token);
         
         app.Lifetime.ApplicationStopped.Register(async () =>
         {
@@ -48,7 +41,6 @@ public static class ProgramExtenstionMethods
             tokenSource.Cancel();
         });
         
-        Console.CursorVisible = false;
         var mapPrint = new Thread(async () =>
         {
             await hubConnection.StartAsync();
@@ -56,19 +48,6 @@ public static class ProgramExtenstionMethods
             while (!tokenSource.Token.IsCancellationRequested)
             {
                 Thread.Sleep(50);
-                // Console.Clear();
-                //
-                // Console.WriteLine($"Free GoCarts: {buffer.Count()}");
-                // Console.WriteLine($"Waiting clients: {manager.WaitingClientsCount()}\n");
-                //
-                // Console.Write("> ");
-                // Console.Write(
-                //     map!.Map
-                //         .Select(section => section.Occupant?.Marker ?? "_")
-                //         .Aggregate((a, b) => $"{a}{b}")
-                // );
-                // Console.Write(" <");
-
                 await hubConnection.InvokeAsync("MapChanged");
             }
         });

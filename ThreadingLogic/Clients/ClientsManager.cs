@@ -42,7 +42,7 @@ public class ClientsManager
             NextId = (NextId + 1) % 99;
             new Client(
                 id: NextId.ToString(), 
-                delay: (_random.Next() % 10) * 100 + 100, 
+                delay: (_random.Next() % 10 + 1) * 50, 
                 goCartsBuffer: _goCartsBuffer, 
                 onEnter: OnClientEnter, 
                 cancellationToken: cancellationToken
