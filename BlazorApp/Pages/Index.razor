@@ -51,14 +51,15 @@
             
             <!-- left line -->
             <div class="vertical-line" style="flex-direction: column-reverse;">
-            @for (int index = 24; index < 28; index++)
-            {
-                <div class="goCart" style="background-color: @Route.Map[index].Occupant?.HexColor;">
-                    @Route.Map[index].Occupant?.Marker
-                </div>
-            }
+                @for (int index = 24; index < 28; index++)
+                {
+                    <div class="goCart" style="background-color: @Route.Map[index].Occupant?.HexColor;">
+                        @Route.Map[index].Occupant?.Marker
+                    </div>
+                }
             </div>
         </div>
+        
         <!-- lower line -->
         <div class="horizontal-line" style="flex-direction: row-reverse;">
             @for (int index = 14; index < 24; index++)
