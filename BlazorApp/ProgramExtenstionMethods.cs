@@ -39,6 +39,8 @@ public static class ProgramExtenstionMethods
             .WithUrl(hubUrl)
             .Build();
         
+        Console.WriteLine(app.Configuration["URLS"]);
+        
         var manager = app.Services.GetService<IThreadable>();
         manager!.StartThread();
         

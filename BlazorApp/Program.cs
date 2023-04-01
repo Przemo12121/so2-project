@@ -1,9 +1,5 @@
 using BlazorApp;
 using BlazorApp.Hubs;
-using ThreadingLogic.Buffers;
-using ThreadingLogic.Clients;
-using ThreadingLogic.Map;
-using Route = Microsoft.AspNetCore.Routing.Route;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
