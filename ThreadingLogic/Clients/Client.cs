@@ -3,24 +3,27 @@ using ThreadingLogic.Map;
 
 namespace ThreadingLogic.Clients;
 
-public class Client
+public class Client<T> : IThreadable
+    where T : IRouteAccessor
 {
     private readonly int _delay;
     private readonly string _id;
-    private readonly IBuffer<IRouteAccessor> _goCartsBuffer;
+    private readonly IRouteAccessorsBuffer<T> _goCartsRouteAccessorsBuffer;
     private readonly Action? _onEnter;
+    private readonly Thread _thread;
 
-    public Client(string id, int delay, IBuffer<IRouteAccessor> goCartsBuffer, Action? onEnter, CancellationToken cancellationToken)
+    public Client(string id, int delay, IRouteAccessorsBuffer<T> goCartsRouteAccessorsBuffer, Action? onEnter, CancellationToken cancellationToken)
     {
         _delay = delay;
         _id = id;
-        _goCartsBuffer = goCartsBuffer;
+        _goCartsRouteAccessorsBuffer = goCartsRouteAccessorsBuffer;
         _onEnter = onEnter;
         
-        Thread thread = new(() => DoWork(cancellationToken));
-        thread.Start();
+        _thread = new(() => DoWork(cancellationToken));
     }
 
+    public void StartThread() => _thread.Start();
+    
     private void DoWork(CancellationToken token)
     {
         var goCart = GetGoCart(token);
@@ -29,13 +32,13 @@ public class Client
         LeaveGoCart(goCart);
     }
 
-    private IRouteAccessor GetGoCart(CancellationToken token)
+    private T GetGoCart(CancellationToken token)
     {
-        IRouteAccessor? goCart;
+        T? goCart;
         do
         {
             Thread.Sleep(_delay);
-            goCart = _goCartsBuffer.Get();
+            goCart = _goCartsRouteAccessorsBuffer.Get();
         } while (goCart is null || token.IsCancellationRequested);
 
         goCart.Marker = _id;
@@ -44,9 +47,9 @@ public class Client
         return goCart;
     }
 
-    private void LeaveGoCart(IRouteAccessor goCart)
+    private void LeaveGoCart(T goCart)
     {
         Thread.Sleep(_delay);
-        _goCartsBuffer.Put(goCart);
+        _goCartsRouteAccessorsBuffer.Put(goCart);
     }
 }

@@ -1,28 +1,26 @@
 ﻿using ThreadingLogic.Map;
 using ThreadingLogic.Utils;
-using ThreadingLogic.Buffers;
 
 namespace ThreadingLogic.Clients;
 
-public class ClientsManager
+public class ClientsManager<T> : IWaitingClientsCounter, IThreadable
+    where T : IRouteAccessor
 {
-    private int NextId { get; set; } = 0;
     private readonly int _delay;
-    private readonly Random _random;
-    private readonly IBuffer<IRouteAccessor> _goCartsBuffer;
+    private readonly IClientsFactory<T> _clientsFactory;
     private readonly ICounter _waitingClientsCounter;
+    private readonly Thread _thread;
     
-    public ClientsManager(int delay, IBuffer<IRouteAccessor> goCartsBuffer, CancellationToken cancellationToken)
+    public ClientsManager(int delay, IClientsFactory<T> clientsFactory, CancellationToken cancellationToken)
     {
         _delay = delay;
-        _goCartsBuffer = goCartsBuffer;
+        _clientsFactory = clientsFactory;
         
-        _random = new();
         _waitingClientsCounter = new Counter(0);
-        
-        Thread thread = new(() => DoWork(cancellationToken));
-        thread.Start();
+        _thread = new(() => DoWork(cancellationToken));
     }
+
+    public void StartThread() => _thread.Start();
 
     private void DoWork(CancellationToken cancellationToken)
     {
@@ -39,14 +37,8 @@ public class ClientsManager
                 _waitingClientsCounter.Increase();
             }
             
-            NextId = (NextId + 1) % 99;
-            new Client(
-                id: NextId.ToString(), 
-                delay: (_random.Next() % 10 + 1) * 50, 
-                goCartsBuffer: _goCartsBuffer, 
-                onEnter: OnClientEnter, 
-                cancellationToken: cancellationToken
-            );
+            var client = _clientsFactory.Create(OnClientEnter, cancellationToken);
+            client.StartThread();
         }
     }
 
@@ -58,5 +50,5 @@ public class ClientsManager
         }
     }
 
-    public int WaitingClientsCount() => _waitingClientsCounter.Value;
+    public int CountWaitingClients() => _waitingClientsCounter.Value;
 }

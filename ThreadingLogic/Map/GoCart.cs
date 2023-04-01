@@ -1,11 +1,11 @@
 ﻿namespace ThreadingLogic.Map;
 
-public class GoCart : IGoCart
+public class GoCart : IRouteAccessor, IOccupant
 {
     private readonly Route _route;
     public string Marker { get; set; } = String.Empty;
-    public string HexColor { get; init; }
-    private Section? Position { get; set; } = default;
+    public string HexColor { get; }
+    private Section? Position { get; set; }
     
     public int Delay { get; set; }
     

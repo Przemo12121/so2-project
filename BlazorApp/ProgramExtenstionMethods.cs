@@ -8,18 +8,27 @@ namespace BlazorApp;
 
 public static class ProgramExtenstionMethods
 {
+    private static CancellationTokenSource TokenSource = new();
+    private static string[] Colors = { "#fe6efe", "#a5fe6e", "#bc93ec", "#8fc9ff", "#92ec3e", "#fa5594", "#ff9a6b", "#d9e069", "#57ff85", "#4ccffc" };
+    
     public static void AddThreadingLogic(this WebApplicationBuilder builder)
     {
-        string[] colors = new[] { "#fe6efe", "#a5fe6e", "#bc93ec", "#8fc9ff", "#92ec3e", "#fa5594", "#ff9a6b", "#d9e069", "#57ff85", "#4ccffc" };
-        
         ThreadingLogic.Map.Route map = new(28);
         GoCart[] goCarts = Enumerable
             .Range(0, 10)
-            .Select(i => new GoCart(map, colors[i]))
+            .Select(i => new GoCart(map, Colors[i]))
             .ToArray();
+        GoCartsBuffer buffer = new GoCartsBuffer(goCarts);
+        ClientsManager<GoCart> manager = new(
+            delay: 1000,
+            clientsFactory: new GoCartClientsFactory(buffer),
+            cancellationToken: TokenSource.Token
+        );
         
-        builder.Services.AddSingleton<IRoute, ThreadingLogic.Map.Route>(service => map);
-        builder.Services.AddSingleton<RouteAccessorsBuffer<IRouteAccessor>>(service => new (goCarts));
+        builder.Services.AddSingleton<IWaitingClientsCounter, ClientsManager<GoCart>>(_ => manager);
+        builder.Services.AddSingleton<IThreadable, ClientsManager<GoCart>>(_ => manager);
+        builder.Services.AddSingleton<IRoute, ThreadingLogic.Map.Route>(_ => map);
+        builder.Services.AddSingleton<GoCartsBuffer>(_ => buffer);
         builder.Services.AddSingleton<MapSyncingHub>();
     }
     
@@ -30,22 +39,20 @@ public static class ProgramExtenstionMethods
             .WithUrl(hubUrl)
             .Build();
         
-        var buffer = app.Services.GetService<RouteAccessorsBuffer<IRouteAccessor>>();
-        
-        CancellationTokenSource tokenSource = new();
-        new ClientsManager(1000, buffer!, tokenSource.Token);
+        var manager = app.Services.GetService<IThreadable>();
+        manager!.StartThread();
         
         app.Lifetime.ApplicationStopped.Register(async () =>
         {
             await hubConnection.StopAsync();
-            tokenSource.Cancel();
+            TokenSource.Cancel();
         });
         
         var mapPrint = new Thread(async () =>
         {
             await hubConnection.StartAsync();
             
-            while (!tokenSource.Token.IsCancellationRequested)
+            while (!TokenSource.Token.IsCancellationRequested)
             {
                 Thread.Sleep(50);
                 await hubConnection.InvokeAsync("MapChanged");
