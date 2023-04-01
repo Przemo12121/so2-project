@@ -5,7 +5,7 @@ namespace ThreadingLogic.Buffers;
 public class GoCartsBuffer : IRouteAccessorsBuffer<GoCart>
 {
     private readonly Queue<GoCart> _goCarts;
-
+    
     public GoCartsBuffer(IEnumerable<GoCart> goCarts)
     {
         _goCarts = new Queue<GoCart>(goCarts);
@@ -28,8 +28,8 @@ public class GoCartsBuffer : IRouteAccessorsBuffer<GoCart>
             _goCarts.Enqueue(goCart);
         }
     }
-
-    public IReadOnlyList<string> Preview() 
+    
+    public IReadOnlyList<string> Preview()
         => _goCarts
             .Select(cart => cart.HexColor)
             .ToList()

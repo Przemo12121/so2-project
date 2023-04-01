@@ -27,6 +27,6 @@ app.MapBlazorHub();
 app.MapHub<MapSyncingHub>(MapSyncingHub.HubUrl);
 app.MapFallbackToPage("/_Host");
 
-app.StartThreads();
+app.UsePageRefreshingThread();
 
 app.Run();

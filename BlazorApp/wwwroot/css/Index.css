@@ -50,3 +50,15 @@
     flex-direction: column; 
     background-color: azure
 }
+
+.button-container {
+    margin-top: 30px;
+    height: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+button {
+    width: 120px;
+}

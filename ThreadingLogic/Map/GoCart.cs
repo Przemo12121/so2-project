@@ -2,16 +2,16 @@
 
 public class GoCart : IRouteAccessor, IOccupant
 {
-    private readonly Route _route;
+    private readonly IRoute<Section> _raceRoute;
     public string Marker { get; set; } = String.Empty;
     public string HexColor { get; }
     private Section? Position { get; set; }
     
     public int Delay { get; set; }
     
-    public GoCart(Route route, string hexColor)
+    public GoCart(IRoute<Section> raceRoute, string hexColor)
     {
-        _route = route;
+        _raceRoute = raceRoute;
         HexColor = hexColor;
     }
     
@@ -23,8 +23,8 @@ public class GoCart : IRouteAccessor, IOccupant
         }
         
         int lap = 0;
-        Section nextPosition = _route.Enter();
-        Position = _route.Enter();
+        Section nextPosition = _raceRoute.Enter();
+        Position = _raceRoute.Enter();
         
         do
         {
@@ -32,7 +32,7 @@ public class GoCart : IRouteAccessor, IOccupant
             {
                 Position.Occupant = this;
                 Thread.Sleep(Delay);
-                nextPosition = _route.Next(Position);
+                nextPosition = _raceRoute.Next(Position);
 
                 lock (nextPosition)
                 {
@@ -40,7 +40,7 @@ public class GoCart : IRouteAccessor, IOccupant
                     Position = nextPosition;
                 }
 
-                if (_route.IsFinished(Position))
+                if (_raceRoute.IsFinished(Position))
                 {
                     lap++;
                 }

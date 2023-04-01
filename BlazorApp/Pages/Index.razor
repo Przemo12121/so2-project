@@ -1,26 +1,22 @@
 ﻿@page "/"
-@using ThreadingLogic.Map
 @using BlazorApp.Hubs
+@using BlazorApp.Services
 @using Microsoft.AspNetCore.SignalR.Client
-@using ThreadingLogic.Buffers
-@using ThreadingLogic.Clients
-@inject IRoute Route
+@inject IControllable Control
 @inject MapSyncingHub Hub
-@inject IWaitingClientsCounter Counter
-@inject GoCartsBuffer Buffer
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
+
 
 <link href="css/Index.css" rel="stylesheet"/>
 
 <div class="layout">
     <h1>Multithread project by Przemysław Małecki</h1>
-    
-    <p>Waiting clients: @Counter.CountWaitingClients().ToString()</p>
-    
+
+    <p>Waiting clients: @_status.WaitingClientsCount.ToString()</p>
     <p>Free GoCarts: </p>
     <div class="buffer">
-        @foreach (var goCart in Buffer.Preview())
+        @foreach (var goCart in _status.GoCartsBufferPreview)
         {
             <div class="goCart" style="background-color: @goCart" />
         }
@@ -29,55 +25,94 @@
     <div>
         <!-- upper line -->
         <div class="horizontal-line">
-            @for (int index = 0; index < 10; index++)
+            @if (Control.IsRunning)
             {
-                <div class="goCart" style="background-color: @Route.Map[index].Occupant?.HexColor;">
-                    @Route.Map[index].Occupant?.Marker 
-                </div>
+                @for (int index = 0; index < 10; index++)
+                {
+                    <div class="goCart" style="background-color: @_status.Map[index].Occupant?.HexColor;">
+                        @_status.Map[index].Occupant?.Marker
+                    </div>
+                }
             }
         </div>
-        
+    
         <!-- vertical lines -->
         <div class="vertical-line-container">
             <!-- right line -->
             <div class="vertical-line">
-                @for (int index = 10; index < 14; index++)
+                @if (Control.IsRunning)
                 {
-                    <div class="goCart" style="background-color: @Route.Map[index].Occupant?.HexColor;">
-                        @Route.Map[index].Occupant?.Marker
-                    </div>
+                    @for (int index = 10; index < 14; index++)
+                    {
+                        <div class="goCart" style="background-color: @_status.Map[index].Occupant?.HexColor;">
+                            @_status.Map[index].Occupant?.Marker
+                        </div>
+                    }
                 }
             </div>
-            
+    
             <!-- left line -->
             <div class="vertical-line" style="flex-direction: column-reverse;">
-                @for (int index = 24; index < 28; index++)
+                @if (Control.IsRunning)
                 {
-                    <div class="goCart" style="background-color: @Route.Map[index].Occupant?.HexColor;">
-                        @Route.Map[index].Occupant?.Marker
-                    </div>
+                    @for (int index = 24; index < 28; index++)
+                    {
+                        <div class="goCart" style="background-color: @_status.Map[index].Occupant?.HexColor;">
+                            @_status.Map[index].Occupant?.Marker
+                        </div>
+                    }
                 }
             </div>
         </div>
-        
+    
         <!-- lower line -->
         <div class="horizontal-line" style="flex-direction: row-reverse;">
-            @for (int index = 14; index < 24; index++)
+            @if (Control.IsRunning)
             {
-                <div class="goCart" style="background-color: @Route.Map[index].Occupant?.HexColor;">
-                    @Route.Map[index].Occupant?.Marker
-                </div>
+                @for (int index = 14; index < 24; index++)
+                {
+                    <div class="goCart" style="background-color: @_status.Map[index].Occupant?.HexColor;">
+                        @_status.Map[index].Occupant?.Marker
+                    </div>
+                }
             }
         </div>
+    </div>
+    
+    <div class="button-container">
+        @if (Control.IsRunning)
+        {
+            <button @onclick="Stop">Stop</button>
+            
+        }
+        else
+        {
+            <button @onclick="Start">Start</button>
+        }
     </div>
 </div>
 
 @code
 {
+    void Start()
+    {
+        Control.Start();
+        _status = Control.Status();
+    }
+
+    void Stop()
+    {
+        Control.Stop();
+        _status = Control.Status();
+    }
+    
+    private ThreadingLogicStatus _status;    
     private HubConnection? _hubConnection;
     
     protected override async Task OnInitializedAsync()
     {
+        _status = Control.Status();
+        
         string baseUrl = NavigationManager.BaseUri;
         
         var hubUrl = baseUrl.TrimEnd('/') + MapSyncingHub.HubUrl;
@@ -90,7 +125,11 @@
         await _hubConnection.StartAsync();
     }
 
-    private void UpdateMap() => StateHasChanged();
+    private void UpdateMap()
+    {
+        StateHasChanged();
+        _status = Control.Status();
+    }
     
     public async ValueTask DisposeAsync()
     {

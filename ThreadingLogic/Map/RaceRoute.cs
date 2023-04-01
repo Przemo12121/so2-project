@@ -1,10 +1,10 @@
 ﻿namespace ThreadingLogic.Map;
 
-public class Route : IRoute
+public class RaceRoute : IRoute<Section>
 {
     public IReadOnlyList<Section> Map { get; private init; }
     
-    public Route(int length)
+    public RaceRoute(int length)
     {
         Map = new List<Section>(
             Enumerable.Range(0, length)

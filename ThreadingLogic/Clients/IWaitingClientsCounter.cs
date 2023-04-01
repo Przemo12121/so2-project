@@ -2,5 +2,5 @@
 
 public interface IWaitingClientsCounter
 {
-    int CountWaitingClients();
+    int WaitingClients { get; }
 }

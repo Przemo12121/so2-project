@@ -1,6 +1,9 @@
 ﻿namespace ThreadingLogic.Map;
 
-public interface IRoute
+public interface IRoute<T>
 {
-    IReadOnlyList<Section> Map { get; }
+    IReadOnlyList<T> Map { get; }
+    T Next(T current);
+    bool IsFinished(T current);
+    T Enter();
 }
