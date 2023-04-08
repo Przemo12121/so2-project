@@ -46,7 +46,10 @@ public class GoCart : IRouteAccessor, IOccupant
                 }
             }
         } while (lap < rounds && !cancellationToken.IsCancellationRequested);
-        
-        Position.Occupant = this;
+
+        lock (Position)
+        {
+            Position.Occupant = default;
+        }
     }
 }

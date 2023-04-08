@@ -4,6 +4,7 @@ build:
 
 run:
 	docker start so2_250147
+	@echo "Visit http://localhost:5224 to see the project in action."
 	
 stop:
 	docker stop so2_250147
